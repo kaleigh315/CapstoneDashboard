@@ -1,3 +1,4 @@
+# Packages
 import pandas as pd
 import numpy as np
 import plotly_express as px
@@ -5,16 +6,26 @@ import plotly.graph_objects as go
 import os
 from dash import Dash, html, dcc, Input, Output, callback, dash_table
 
-topic_measurement = pd.read_csv("topic_measurement.csv")
-topic_cluster = pd.read_csv("topic_cluster.csv")
+# Read data
+topic_measurement = pd.read_csv('../data/model_outputs/topic_measurement.csv').set_index(['topic', 'measurement'])
+topic_cluster = pd.read_csv('../data/model_outputs/topic_cluster.csv').set_index(['topic', 'cluster'])
 
+# Dash code
 # initialize app
 app = Dash(__name__)
 server = app.server
 
 # define layout
 app.layout = html.Div([
-    html.H2('Select Topic:', style={'text-align': 'center', 'font-family': 'arial', 'color': 'white'}),
+    html.H1('ALMA Spectral Line Measurement Explorer', style={'font-family':'arial'}),
+    html.H2('This dashboard allows you to explore the measurements made for accepted\
+            projects, grouped by project topic.', style={'font-family':'arial'}),
+    html.H3('Some of the histogram lines are very narrow, so please refer to the scatterplot to observe all clusters before exploring the histogram.',
+            style={'font-family':'arial'}),
+    html.H3('You can click and drag areas on the plots to zoom in on specific regions.',
+            style={'font-family':'arial'}),
+    html.H3('Select a topic to explore with the dropdown menu below',
+            style={'text-align': 'left', 'font-family': 'arial', 'color': 'black'}),
     dcc.Dropdown(
         id='topic-cluster-options',
         options=[{'label': str(i), 'value': i} for i in range(51)],
@@ -34,7 +45,7 @@ app.layout = html.Div([
             labelStyle={'display': 'inline-block'},
             style={'text-align': 'center'}
         )
-    ], style={'margin': '10px auto', 'textAlign': 'left', 'color': 'white', 'font-family': 'arial'}),
+    ], style={'margin': '10px auto', 'textAlign': 'left', 'color': 'black', 'font-family': 'arial'}),
     dcc.Graph(
         id='histogram'
     ),
@@ -43,10 +54,10 @@ app.layout = html.Div([
             dcc.Graph(id='cluster-histogram'),
         ], style={'width': '49%', 'height':'400px', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
-            html.H3('Selected Cluster Data', style={'text-align': 'center', 'color': 'white', 'font-family': 'arial', 'vertical_align':'top', 'background-color':'black'}),
-            html.Div(id='datatable-container', style={'display':'block', 'maxHeight': '400px', 'overflowY': 'auto', 'vertical_align':'bottom', 'horizontal_align':'middle', 'background-color':'black'})
-        ], style={'width': '49%', 'height':'400px', 'display': 'inline-block', 'vertical-align': 'bottom', 'background-color':'black'})
-    ], style={'height':'400px', 'background-color':'black'})
+            html.H3('Selected Cluster Data', style={'text-align': 'center', 'black': 'white', 'font-family': 'arial', 'vertical_align':'top'}),
+            html.Div(id='datatable-container', style={'display':'block', 'maxHeight': '400px', 'overflowY': 'auto', 'vertical_align':'bottom', 'horizontal_align':'middle'})
+        ], style={'width': '49%', 'height':'400px', 'display': 'inline-block', 'vertical-align': 'bottom'})
+    ], style={'height':'400px'})
 ])
 
 # define callbacks
@@ -84,7 +95,7 @@ def update_graph(inspect_topic, click_data, y_axis_option):
     hist.add_trace(go.Bar(
         x=filtered_df.med_freq,
         y=filtered_df[y_axis_option],  # Use selected y-axis option
-        marker=dict(color=filtered_df.count_proj, colorscale='bluered'),
+        marker=dict(color=filtered_df.count_proj, colorscale='bluered', line=dict(width=0.1, color='black')),
         width=filtered_df.width.to_list(),
         name=f'Cluster for Topic {inspect_topic}',
         hovertemplate=
@@ -125,7 +136,7 @@ def update_graph(inspect_topic, click_data, y_axis_option):
                                  })
     scatter.update_traces(marker={'size': 15, 'opacity': 0.5})
 
-    scatter.layout.template = 'plotly_dark'
+    scatter.layout.template = 'plotly'
 
     # Default cluster label for cluster histogram
     cluster_label = 0
@@ -140,7 +151,7 @@ def update_graph(inspect_topic, click_data, y_axis_option):
                                 title=f"Histogram of Measurements for Cluster {cluster_label} (Topic {inspect_topic})",
                                 labels={'med_freq': 'Median Frequency (GHz)', 'count': 'Count'})
     cluster_hist.update_layout(yaxis_title='Count of Measurements')
-    cluster_hist.layout.template = 'plotly_dark'
+    cluster_hist.layout.template = 'plotly'
 
     # Create data table for selected cluster_label
     data_table = dash_table.DataTable(
@@ -149,8 +160,8 @@ def update_graph(inspect_topic, click_data, y_axis_option):
         data=inspect_topic_frame[inspect_topic_frame['cluster_label'] == str(cluster_label)].sort_values('med_freq', ascending=True).to_dict('records'),
         style_table={'overflowX': 'scroll'},
     style_data={
-        'color': 'white',
-        'backgroundColor': 'DimGray',
+        'color': 'black',
+        'backgroundColor': 'white',
         'font_family':'arial'
     },
     style_as_list_view=True,
@@ -160,12 +171,12 @@ def update_graph(inspect_topic, click_data, y_axis_option):
     style_data_conditional=[
         {
             'if': {'row_index': 'odd'},
-            'backgroundColor': 'DarkGray',
+            'backgroundColor': 'Silver',
         }
     ],
     style_header={
-        'backgroundColor': 'black',
-        'color': 'white',
+        'backgroundColor': 'white',
+        'color': 'black',
         'font_family':'arial',
         'fontWeight': 'bold'
     }
