@@ -14,6 +14,7 @@ topic_cluster = pd.read_csv('topic_cluster.csv').set_index(['topic', 'cluster'])
 # Dash code
 # initialize app
 app = Dash(__name__)
+server = app.server
 
 # define layout
 app.layout = html.Div([
