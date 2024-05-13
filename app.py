@@ -7,9 +7,9 @@ import os
 from dash import Dash, html, dcc, Input, Output, callback, dash_table
 
 # Read data
-topic_words = pd.read_csv('../data/model_outputs/topic_words.csv').set_index(['topic', 'word_number'])
-topic_measurement = pd.read_csv('../data/model_outputs/topic_measurement.csv').set_index(['topic', 'measurement'])
-topic_cluster = pd.read_csv('../data/model_outputs/topic_cluster.csv').set_index(['topic', 'cluster'])
+topic_words = pd.read_csv('topic_words.csv').set_index(['topic', 'word_number'])
+topic_measurement = pd.read_csv('topic_measurement.csv').set_index(['topic', 'measurement'])
+topic_cluster = pd.read_csv('topic_cluster.csv').set_index(['topic', 'cluster'])
 
 # Dash code
 # initialize app
